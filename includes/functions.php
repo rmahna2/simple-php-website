@@ -25,14 +25,25 @@ function site_version()
 }
 
 /**
+ * Extract page from URI for default page, pretty or query
+ */
+
+function get_page()
+{
+    $page = isset($_SERVER['REQUEST_URI']) ? str_replace(array('/','?page='), array('',''), $_SERVER['REQUEST_URI']) : 'Home';
+    return empty($page) ? 'Home' : $page ;
+}
+
+/**
  * Website navigation.
  */
 function nav_menu($sep = ' | ')
 {
     $nav_menu = '';
     $nav_items = config('nav_menu');
+    $page = get_page();
     foreach ($nav_items as $uri => $name) {
-        $class = str_replace('page=', '', $_SERVER['QUERY_STRING']) == $uri ? ' active' : '';
+        $class = $page == $uri ? ' active' : '';
         $url = config('site_url') . '/' . (config('pretty_uri') || $uri == '' ? '' : '?page=') . $uri;
         
         $nav_menu .= '<a href="' . $url . '" title="' . $name . '" class="item ' . $class . '">' . $name . '</a>' . $sep;
@@ -48,8 +59,7 @@ function nav_menu($sep = ' | ')
  */
 function page_title()
 {
-    $page = isset($_GET['page']) ? htmlspecialchars($_GET['page']) : 'Home';
-
+    $page = get_page();
     echo ucwords(str_replace('-', ' ', $page));
 }
 
@@ -60,7 +70,7 @@ function page_title()
  */
 function page_content()
 {
-    $page = isset($_GET['page']) ? $_GET['page'] : 'home';
+    $page = get_page();
 
     $path = getcwd() . '/' . config('content_path') . '/' . $page . '.phtml';
 
